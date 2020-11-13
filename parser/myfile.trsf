@@ -1,0 +1,16 @@
+!XProd1
+a:b,c
+b:c
+@
+
+!YProd2
+a:b,c,d
+b:c
+@
+
+
+
+
+!ZProd3
+a:b,c,d
+b:c
