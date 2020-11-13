@@ -4,3 +4,6 @@
 
 /output
 /.vs
+/dependencies
+/input
+/__pycache__
