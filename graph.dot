@@ -1,0 +1,9 @@
+graph TEST {
+	a[label=a]
+	b[label=b]
+	c[label=c]
+	d[label=d]
+	x[label=x]
+    d -- x -- b;
+    a -- x -- c;
+}

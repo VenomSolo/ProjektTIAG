@@ -1,100 +1,82 @@
-#from pydot import * 
-#from tkinter import *
-#from graphviz import *
-#index=0
-#dot = Graph(comment='The Round Table',format='png')
-#dot.node('A', 'King Arthur')
-#dot.node('B', 'Sir Bedevere the Wise')
-#dot.node('L', 'Sir Lancelot the Brave')
+import tkinter as tk
+from tkinter import filedialog as fd
+import pydot
+import os
+import dependencies.parser as parser
+import dependencies.utilities as utilities
+import subprocess
 
-#dot = graph_from_dot_file("graph1.dot")[0]
-
-##dot.edges(['AB', 'AL'])
-##dot.edge('B', 'L', constraint='false')
-##print(dot.source)
-##dot.render('test-output/round-table.gv')  
-#dot.write('test-output.gv')
-
-#root = Tk()
-
-#def clicked(label1):
-#    global index
-
-#    img = PhotoImage(file = "test-output.gv.png")
-#    label1.image = img # bez referencji garbage collector wyebie
-#    label1.configure(image = img)
-#    dot.add_node(Node(str(index), 'King Arthur'))
-#    index+=1
-#    dot.write('test-output.gv') 
-
-
-#label1 =Label(root, text = "")
-#label1.pack()
-#b1 =Button(root, text = "Display", command = lambda: clicked(label1))
-#b1.pack()
-#root.mainloop()
-
-from pydot import * 
-from graphviz import Digraph
-from graphviz import Source
-from tkinter import *
-
-index=0
+#Initialization
 output_folder="output/"
-dot = graph_from_dot_file("graph.gv")[0]
-dot2 = graph_from_dot_file("subgraph.gv")[0]
-subg = dot2.get_subgraph("subTEST")[0]
-neighbours = []
+max_index=0 #Uzywane w 'historii' grafu
+index=0 #id aktualnie wyswietlanego grafu
+root =tk.Tk()
+pairs = None
 
-
-dot.write_png(output_folder+str(index)+".png")
-
-root =Tk()
-
-def clicked(label1):
-    global index
-    img = PhotoImage(file = output_folder+str(index)+".png")
-    label1.image = img # bez referencji garbage collector wyebie
-    label1.configure(image = img)
-    dot.add_node(Node(str(index), label = 'a'))
-    dot.add_node(Node(str(index), label = 'a'))
+def Action_button_clicked(Graph_label,variable):
+    global max_index,index,pairs
+    data=pydot.graph_from_dot_file(output_folder+str(index)+".gv")[0]
     index+=1
-    dot.write_dot(output_folder+str(index)+".gv")
-    dot.write_png(output_folder+str(index)+".png")
-
-def getNeighbours(node):
-    edges = dot.get_edges()
-    name = node.get('name')
-    ret = []
-    for e in edges:
-        if e.get_source() is name or e.get_destination() is name:
-            ret.append(dot.get_node(name))
-
-def applyTo(label1):
+    max_index=index
+    max_index=utilities.apply_production_random(data,pairs["prod1"],max_index)#Placeholder na produkcje
+    max_index=utilities.apply_production_random(data,pairs["prod3"],max_index)
+    Generate_files(data)
+    img=tk.PhotoImage(file = output_folder+str(index)+".png")
+    Graph_label.image = img
+    Graph_label.configure(image = img)
+def Backward_button_clicked(Graph_label):
     global index
-    nodes = dot.get_node_list()
-    for n in nodes:
-        print(n.get("name"))
-        if n.get('label').rstrip() == "\"d\"":
-            neighbours = getNeighbours(n)
-            dot.del_node("\"d\"")
-            dot.add_subgraph(subg)
-            break
-        else: print(n.get('label'), n)
+    if index-1<0:
+        return
+    index-=1
+    img=tk.PhotoImage(file = output_folder+str(index)+".png")
+    Graph_label.image = img
+    Graph_label.configure(image = img)
+def Forward_button_clicked(Graph_label):
+    global max_index,index
+    if not index<max_index:
+        return
     index+=1
-    dot.write_dot(output_folder+str(index)+".gv")
-    dot.write_png(output_folder+str(index)+".png")
-    img = PhotoImage(file = output_folder+str(index)+".png")
-    label1.image = img # bez referencji garbage collector wyebie
-    label1.configure(image = img)
-
-
-
-
-label1 =Label(root, text = "")
-label1.pack()
-b1 =Button(root, text = "Display", command = lambda: clicked(label1))
-b1.pack()
-b2 =Button(root, text = "Apply", command = lambda: applyTo(label1))
-b2.pack()
-root.mainloop()
+    img=tk.PhotoImage(file = output_folder+str(index)+".png")
+    Graph_label.image = img
+    Graph_label.configure(image = img)
+def Generate_files(graph):
+    graph.write_dot(output_folder+str(index)+".gv")
+    graph.write_png(output_folder+str(index)+".png")
+def Show_full_size_clicked():subprocess.run(["explorer","output\\"+str(index)+".png"])
+#def Load_graphs(file_list):    #TODO
+if __name__ == "__main__":
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    Generate_files(pydot.graph_from_dot_file(fd.askopenfilename(parent=root,title='Wybierz początkowy plik DOT'))[0])
+    transforms = parser.get_transforms(fd.askopenfilename(parent=root,title='Wybierz plik z transformacjami'))
+    productions = parser.get_productions(fd.askopenfilename(parent=root,title='Wybierz plik z produkcjami'))
+    pairs = parser.pair(productions, transforms);
+    print(len(pairs))
+    #Graph label
+    Graph_label =tk.Label(root, text = "")
+    img=tk.PhotoImage(file = output_folder+str(index)+".png")
+    Graph_label.image =img
+    Graph_label.configure(image = img)
+    Graph_label.pack()
+    #Drop list
+    names=[]
+    for obj in transforms:
+        names.append(obj.name)
+    variable = tk.StringVar(root)
+    variable.set(names[0])
+    Drop_list = tk.OptionMenu(root, variable,*names)
+    Drop_list.pack()
+    #Action Button
+    Action_button =tk.Button(root, text = "Wykonaj", command = lambda: Action_button_clicked(Graph_label,variable))
+    Action_button.pack()
+    #Backward Button
+    Backward_button =tk.Button(root, text = "Poprzedni", command = lambda: Backward_button_clicked(Graph_label))
+    Backward_button.pack()
+    #Forward Button
+    Forward_button =tk.Button(root, text = "Następny", command = lambda: Forward_button_clicked(Graph_label))
+    Forward_button.pack()
+    #Full_Size
+    Show_full_size_button=tk.Button(root, text = "Jezeli sie nie miesci...", command = lambda: Show_full_size_clicked())
+    Show_full_size_button.pack()
+    root.mainloop()

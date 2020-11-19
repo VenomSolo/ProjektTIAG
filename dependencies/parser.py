@@ -1,3 +1,5 @@
+import pydot
+
 class Pair:
     def __init__(self, production, transformation):
         self.production = production
@@ -22,7 +24,7 @@ class Transform:
         self.bindings[bind[0]] = bind[1]
 
 def get_productions(filename):
-    productParentGraph = graph_from_dot_file(filename)[0]
+    productParentGraph = pydot.graph_from_dot_file(filename)[0]
     subgraphs = productParentGraph.get_subgraphs()
     return subgraphs
 
@@ -62,15 +64,11 @@ def pair(prodGraphs, transforms):
     ret = {}
     for i in range(0, max(len(prodGraphs), len(transforms))):
         p = prodGraphs[i]
+        name = p.get_name()
         for t in transforms:
-            if t.name is p.name:
-                ret[p.name] = Pair(p, t)
-        ret[p.name] = Pair(p, None)
-
-def main():
-    transforms = getTransforms('myfile.trsf')
-    for t in transforms:
-        print(t)
-
-if __name__ == "__main__":
-    main()
+            print(t.name, name)
+            if t.name == name:
+                ret[name] = Pair(p, t)
+                print("ok")
+        if ret[name] is None: ret[name] = Pair(p, None)
+    return ret
