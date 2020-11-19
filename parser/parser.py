@@ -11,9 +11,9 @@ class Transform:
 
     def __str__(self):
         ret = self.entry + " --> " + self.name + "\n"
-        for b in self.bindings:
-            ret += b[0] + " |"
-            for s in b[1]:
+        for key, value in self.bindings.items():
+            ret += key + " |"
+            for s in value:
                 ret += " " + s
             ret += "\n"
         return ret
