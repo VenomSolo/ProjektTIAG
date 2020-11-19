@@ -1,8 +1,13 @@
+class Pair:
+    def __init__(self, production, transformation):
+        self.production = production
+        self.transformation = transformation
+
 class Transform:
     def __init__(self, entry, name):
         self.entry = entry
         self.name = name
-        self.bindings = []
+        self.bindings = {}
 
     def __str__(self):
         ret = self.entry + " --> " + self.name + "\n"
@@ -14,10 +19,14 @@ class Transform:
         return ret
 
     def addBinding(self, bind):
-        self.bindings.append(bind)
+        self.bindings[bind[0]] = bind[1]
 
+def get_productions(filename):
+    productParentGraph = graph_from_dot_file(filename)[0]
+    subgraphs = productParentGraph.get_subgraphs()
+    return subgraphs
 
-def getTransforms(filename):
+def get_transforms(filename):
     transformFile = open(filename, 'r') 
     Lines = []
 
@@ -48,6 +57,15 @@ def getTransforms(filename):
         lineTrc += 1
 
     return transforms
+
+def pair(prodGraphs, transforms):
+    ret = {}
+    for i in range(0, max(len(prodGraphs), len(transforms))):
+        p = prodGraphs[i]
+        for t in transforms:
+            if t.name is p.name:
+                ret[p.name] = Pair(p, t)
+        ret[p.name] = Pair(p, None)
 
 def main():
     transforms = getTransforms('myfile.trsf')
