@@ -33,7 +33,7 @@ def delete_node(dot, node):
         dot.del_edge(e.get_source(), e.get_destination())
     dot.del_node(v1_name)
 
-def apply_production_random(dot, pair):
+def apply_production_random(dot, pair, counter):
     leftSide = pair.transformation.entry
     candidates = get_node_label(dot, leftSide)
     if len(candidates) == 0: return -1
