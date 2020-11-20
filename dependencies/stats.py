@@ -1,5 +1,15 @@
 import pydot
-from .utilities import get_neighbours
+def get_neighbours(dot, node):
+    edges = dot.get_edges()
+    name = node.get_name()
+    ret = []
+    for e in edges:
+        if e.get_source() is name:
+            ret.append(dot.get_node(e.get_destination())[0])
+        elif e.get_destination() is name:
+            ret.append(dot.get_node(e.get_source())[0])
+    return ret
+
 def Nodes_number(nodes):
     return len(nodes)
 def Edges_number(Graph):
