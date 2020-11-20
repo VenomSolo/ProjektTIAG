@@ -17,6 +17,6 @@ graph subgraphs {
 		x3 -- y3;
 	}
 	subgraph prod4{
-		y4[label=y]
+		y4[label=c];
 	}
 }

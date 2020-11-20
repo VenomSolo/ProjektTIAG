@@ -1,4 +1,5 @@
 graph TEST {
+	graph [size = "15,15"]
 	1[label=a]
 	2[label=b]
 	3[label=c]

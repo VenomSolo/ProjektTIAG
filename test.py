@@ -50,7 +50,7 @@ if __name__ == "__main__":
         os.makedirs(output_folder)
     Generate_files(pydot.graph_from_dot_file(fd.askopenfilename(parent=root,title='Wybierz początkowy plik DOT'))[0])
     transforms = parser.get_transforms(fd.askopenfilename(parent=root,title='Wybierz plik z transformacjami'))
-    productions = parser.get_productions(fd.askopenfilename(parent=root,title='Wybierz plik z produkcjami'))
+    
     pairs = parser.pair(productions, transforms);
     print(len(pairs))
     #Graph label

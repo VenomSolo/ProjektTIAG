@@ -2,9 +2,10 @@
 from tkinter import filedialog as fd
 import pydot
 import os
-import Modules.parser as parser
+import dependencies.parser as parser
+import dependencies.utilities as utilities
 import subprocess
-import Modules.stats as stats
+import dependencies.stats as stats
 class MainApplication(tk.Tk):
     output_folder="output/"
     max_index=0#Uzywane w 'historii' grafu
@@ -55,23 +56,28 @@ class MainApplication(tk.Tk):
         #Load Data
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
-        self.Generate_files(pydot.graph_from_dot_file(fd.askopenfilename(parent=self,title='Wybierz początkowy plik DOT'))[0])
+        data=pydot.graph_from_dot_file(fd.askopenfilename(parent=self,title='Wybierz początkowy plik DOT'))[0]
+        self.Generate_files(data)
+        self.vertex_counter = len(data.get_nodes())+1
         img=tk.PhotoImage(file = self.output_folder+str(self.index)+".png")
         self.Graph_label.image =img
         self.Graph_label.configure(image = img)
         self.Update_stats_label()
-        transforms = parser.getTransforms(fd.askopenfilename(parent=self,title='Wybierz plik z transformacjami'))
+        transforms = parser.get_transforms(fd.askopenfilename(parent=self,title='Wybierz plik z transformacjami'))
+        productions = parser.get_productions(fd.askopenfilename(parent=self,title='Wybierz plik z produkcjami'))
+        self.pairs = parser.pair(productions, transforms);
+
         #Drop list
         names=[]
         for obj in transforms:
             names.append(obj.name)
-        variable = tk.StringVar(frame3)
-        variable.set(names[0])
-        Drop_list = tk.OptionMenu(frame3, variable,*names)
+        self.variable = tk.StringVar(frame3)
+        self.variable.set(names[0])
+        Drop_list = tk.OptionMenu(frame3, self.variable,*names)
         Drop_list.pack(padx=(100, 5), pady=20,side=tk.LEFT)
         Drop_list.config(font = ("Helvetica", 20))
         #Action Button
-        Action_button =tk.Button(frame3, text = "Wykonaj",font = ("Helvetica", 20),command = lambda: self.Action_button_clicked(variable))
+        Action_button =tk.Button(frame3, text = "Wykonaj",font = ("Helvetica", 20),command = lambda: self.Action_button_clicked(self.variable))
         Action_button.pack(padx=5, pady=20,side=tk.LEFT,)
 
     def Update_stats_label(self):
@@ -91,10 +97,13 @@ class MainApplication(tk.Tk):
                     "Średnia liczba węzłów w składowej spójnej\n"+str(stats_ret[4]))
         self.Stats_label.configure(text=stats_text)
     def Action_button_clicked(self,variable):
-        data=pydot.graph_from_dot_file(self.output_folder+str(self.index)+".gv")[0]
+        data=pydot.graph_from_dot_file(self.output_folder+str(self.index)+".gv")[0]       
+        tempCount = self.vertex_counter
+        self.vertex_counter=utilities.apply_production_random(data,self.pairs[variable.get()],self.vertex_counter)#Placeholder na produkcje
+        if tempCount == self.vertex_counter:
+            return
         self.index+=1
         self.max_index=self.index
-        data.add_node(pydot.Node(str(self.index),label=variable.get()))#Placeholder na produkcje
         self.Generate_files(data)
         img=tk.PhotoImage(file = self.output_folder+str(self.index)+".png")
         self.Graph_label.image = img

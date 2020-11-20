@@ -1,8 +1,0 @@
-graph TEST {
-	subgraph subTEST {
-	e[label="e"]
-	f[label="f"]
-	x[label="x"]
-    e -- x -- f;
-}
-}
