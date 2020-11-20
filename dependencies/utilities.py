@@ -38,14 +38,14 @@ def delete_node(dot, node):
 def apply_production_random(dot, pair, counter):
     leftSide = pair.transformation.entry
     candidates = get_node_label(dot, leftSide)
-    if len(candidates) == 0: return -1
+    if len(candidates) == 0: return counter
     rnd = Random()
     index = rnd.randint(0, len(candidates)-1)
     return _apply_production(dot, pair, counter, candidates[index].get_name())
 
 def apply_production(dot, pair, counter, index):
     if dot.get_node(index)[0].get("label") is not pair.transformation.entry:
-        return -1
+        return counter
     else: return _apply_production(dot, pair, counter, index)
     
 
