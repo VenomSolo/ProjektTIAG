@@ -66,9 +66,7 @@ def pair(prodGraphs, transforms):
         p = prodGraphs[i]
         name = p.get_name()
         for t in transforms:
-            print(t.name, name)
             if t.name == name:
                 ret[name] = Pair(p, t)
-                print("ok")
         if ret[name] is None: ret[name] = Pair(p, None)
     return ret

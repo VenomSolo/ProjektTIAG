@@ -12,9 +12,9 @@ def get_neighbours(dot, node):
     name = node.get_name()
     ret = []
     for e in edges:
-        if e.get_source() is name:
+        if e.get_source() == name:
             ret.append(dot.get_node(e.get_destination())[0])
-        if e.get_destination() is name:
+        elif e.get_destination() == name:
             ret.append(dot.get_node(e.get_source())[0])
     return ret
 
@@ -36,7 +36,6 @@ def delete_node(dot, node):
     dot.del_node(v1_name)
 
 def apply_production_random(dot, pair, counter):
-    print("nazwa: ", pair.transformation.name)
     leftSide = pair.transformation.entry
     candidates = get_node_label(dot, leftSide)
     if len(candidates) == 0: return -1
@@ -59,15 +58,18 @@ def _apply_production(dot, pair, counter, index):
     edges = pair.production.get_edge_list()
     transform = pair.transformation
     dictMap = {vertexes[c-counter].get_name() : str(c) for c in range(counter, counter + len(vertexes))}
+    newVertexes = []
     for v in vertexes:
-        v.set_name(dictMap[v.get_name()])
-        dot.add_node(v)
+        newVertexes.append(Node(dictMap[v.get_name()]))
+        n = newVertexes[len(newVertexes)-1]
+        n.set("label", v.get("label"))
+        dot.add_node(n)
     for e in edges:
         print(dictMap[e.get_source()], dictMap[e.get_destination()])
         dot.add_edge(Edge(dictMap[e.get_source()], dictMap[e.get_destination()]))
     for n in neighbours:
         for bind in transform.bindings[n.get("label")]:
-            for v in vertexes:
+            for v in newVertexes:
                 if v.get("label") is bind:
                     dot.add_edge(Edge(n.get_name(), v.get_name()))
     return counter + len(vertexes)
