@@ -1,5 +1,6 @@
 import pydot
 from .utilities import get_neighbours
+
 def Nodes_number(nodes):
     return len(nodes)
 def Edges_number(Graph):

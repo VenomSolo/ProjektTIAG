@@ -6,6 +6,7 @@ import dependencies.parser as parser
 import dependencies.utilities as utilities
 import subprocess
 import dependencies.stats as stats
+
 class MainApplication(tk.Tk):
     output_folder="output/"
     max_index=0#Uzywane w 'historii' grafu
