@@ -92,7 +92,7 @@ class MainApplication(tk.Tk):
         stats_text=("Liczba węzłów\n "+str(stats_ret[0])+'\n\n'+
                     "Liczba krawędzi\n"+str(stats_ret[1])+'\n\n'+
                     "Średni stopień wierzchołka w Gk\n"+str(stats_ret[2])+"\n\n"+
-                    "Liczba składowych spójnych\n"+str(len(stats_ret[3]))+"\n\n"+
+                    "Liczba składowych spójnych\n"+str(len(stats_ret[4]))+"\n\n"+
                     "Średni stopień wierzchołka dla labelów\n"+str3+"\n\n"+
                     "Średnia liczba węzłów w składowej spójnej\n"+str(stats_ret[4]))
         self.Stats_label.configure(text=stats_text)
