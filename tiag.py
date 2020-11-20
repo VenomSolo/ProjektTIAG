@@ -33,7 +33,7 @@ class MainApplication(tk.Tk):
         self.grid_rowconfigure(0, weight=12)
         self.grid_rowconfigure(1, weight=1)
         #Graph label
-        self.Graph_label =tk.Label(frame1, text = "",bg ="white")
+        self.Graph_label =tk.Label(frame1, text = "",bg ="white",padx=100,pady=100)
         self.Graph_label.pack(fill=tk.BOTH)
         #Backward Button
         Backward_button =tk.Button(frame4, text = "Poprzedni",font = ("Helvetica", 20), command = lambda: self.Backward_button_clicked())
