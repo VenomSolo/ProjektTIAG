@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/output
+/.vs
+/dependencies
+/input
+/__pycache__
+/Modules/__pycache__
+/Modules/parser.py
