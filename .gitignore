@@ -4,8 +4,5 @@
 
 /output
 /.vs
-/dependencies
 /input
 /__pycache__
-/Modules/__pycache__
-/Modules/parser.py
