@@ -50,12 +50,12 @@ def apply_production(dot, pair, counter, index):
     
 
 def _apply_production(dot, pair, counter, index):
-    print(index)
+    #print(index)
     node = dot.get_node(index)[0]
     neighbours = get_neighbours(dot, node)
     delete_node(dot, node)
     vertexes = pair.production.get_node_list()
-    print("Vertexes in sub: ", len(vertexes))
+    #print("Vertexes in sub: ", len(vertexes))
     edges = pair.production.get_edge_list()
     transform = pair.transformation
     dictMap = {vertexes[c-counter].get_name() : str(c) for c in range(counter, counter + len(vertexes))}
@@ -66,7 +66,7 @@ def _apply_production(dot, pair, counter, index):
         n.set("label", v.get("label"))
         dot.add_node(n)
     for e in edges:
-        print(dictMap[e.get_source()], dictMap[e.get_destination()])
+        #print(dictMap[e.get_source()], dictMap[e.get_destination()])
         dot.add_edge(Edge(dictMap[e.get_source()], dictMap[e.get_destination()]))
     for n in neighbours:
         if n.get("label") not in transform.bindings: continue
