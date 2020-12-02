@@ -43,7 +43,7 @@ class MainApplication(tk.Tk):
         #Index Text
         self.Index_text=tk.Text(frame4,height=1,width=5,font = ("Helvetica", 20))
         self.Index_text.insert(tk.END,"0")
-        self.Index_text.configure(state="disabled")
+        #self.Index_text.configure(state="disabled")
         self.Index_text.pack(side=tk.LEFT)
         #Forward Button
         Forward_button =tk.Button(frame4, text = "Następny",font = ("Helvetica", 20), command = lambda: self.Forward_button_clicked())
@@ -80,19 +80,23 @@ class MainApplication(tk.Tk):
         Drop_list.config(font = ("Helvetica", 20))
         #Action Button
         Action_button =tk.Button(frame3, text = "Wykonaj",font = ("Helvetica", 20),command = lambda: self.Action_button_clicked(self.variable))
-        Action_button.pack(padx=5, pady=20,side=tk.LEFT,)
+        Action_button.pack(padx=5, pady=20,side=tk.LEFT)
         #Random text
         self.Random_text=tk.Text(frame3,height=1,width=5,font = ("Helvetica", 20))
         self.Random_text.pack(side=tk.LEFT,padx=(20,0))
         #Random Button
-        Random_button =tk.Button(frame3, text = "<- random",font = ("Helvetica", 20),command = lambda: self.Random_Actions(names[0][:-1],len(names)))
-        Random_button.pack(padx=5, pady=20,side=tk.LEFT,)
+        Random_button =tk.Button(frame3, text = "<- Losowych",font = ("Helvetica", 20),command = lambda: self.Random_Actions(names[0][:-1],len(names)))
+        Random_button.pack(padx=5, pady=20,side=tk.LEFT)
+        #Check Button
+        self.var1 =tk.IntVar()
+        Check_Button=tk.Checkbutton(frame3, text="Wymuś", variable=self.var1,font = ("Helvetica", 20))
+        Check_Button.pack(padx=5, pady=20,side=tk.LEFT)
 
     def Update_stats_label(self):
-        self.Index_text.configure(state="normal")
+        #self.Index_text.configure(state="normal")
         self.Index_text.delete(1.0,tk.END)
         self.Index_text.insert(1.0,str(self.index))
-        self.Index_text.configure(state="disabled")
+        #self.Index_text.configure(state="disabled")
         stats_ret=stats.get_stats(pydot.graph_from_dot_file(self.output_folder+str(self.index)+".gv")[0])
         str3=""
         for i in stats_ret[2]:
@@ -101,8 +105,9 @@ class MainApplication(tk.Tk):
                     "Liczba krawędzi\n"+str(stats_ret[1])+'\n\n'+
                     "Średni stopień wierzchołka w Gk\n"+str(round(stats_ret[1]*2/stats_ret[0],2))+"\n\n"+
                     "Liczba składowych spójnych\n"+str(len(stats_ret[3]))+"\n\n"+
-                    "Średni stopień wierzchołka dla labelów\n"+str3+"\n\n"+
-                    "Liczba węzłów w spójnych składowych\n"+str(stats_ret[3]))
+                    "Średni stopień wierzchołka dla nazw\n"+str3+"\n\n"+
+                    "Liczba węzłów w spójnych składowych\n"+str(stats_ret[3])+
+                    "\n\n Średnia liczba węzłów w składowej spójnej\n"+str(stats_ret[0]/len(stats_ret[3])))
         self.Stats_label.configure(text=stats_text)
     def Action_button_clicked(self,variable):
         data=pydot.graph_from_dot_file(self.output_folder+str(self.index)+".gv")[0]       
@@ -118,12 +123,19 @@ class MainApplication(tk.Tk):
         self.Graph_label.configure(image = img)
         self.Update_stats_label()
     def Random_Actions(self,name,lenght):
+        if(self.var1.get()):
+            self.Random_Actions2(name,lenght)
+        else:
+            self.Random_Actions1(name,lenght)
+    def Random_Actions1(self,name,lenght):
         how_much=int(self.Random_text.get(1.0,tk.END))
         data=pydot.graph_from_dot_file(self.output_folder+str(self.index)+".gv")[0]
         tempCount = self.vertex_counter
         for i in range(how_much+1):
-            self.vertex_counter=utilities.apply_production_random(data,self.pairs[name+str(random.randint(1,lenght))],self.vertex_counter)
+            tmp_rand=random.randint(1,lenght)
+            self.vertex_counter=utilities.apply_production_random(data,self.pairs[name+str(tmp_rand)],self.vertex_counter)
             if tempCount == self.vertex_counter:
+                print("Nie można wykonać "+name+str(tmp_rand)+", przerywam serię transformacji")
                 self.Update_stats_label()
                 return
             tempCount=self.vertex_counter
@@ -134,13 +146,13 @@ class MainApplication(tk.Tk):
             self.Graph_label.image = img
             self.Graph_label.configure(image = img)
         self.Update_stats_label()
-    #\/ Wielokrotnie probuje dojsc do x produkcji
     def Random_Actions2(self,name,lenght):
         i=0
+        index_before=self.index
         how_much=int(self.Random_text.get(1.0,tk.END))
         error_count2=0
         while i<how_much:
-            start_time = time.time()
+            self.index=index_before
             data=pydot.graph_from_dot_file(self.output_folder+str(self.index)+".gv")[0]
             tempCount = self.vertex_counter
             for i in range(how_much+1):
@@ -153,27 +165,39 @@ class MainApplication(tk.Tk):
                         if (error_count==lenght):
                             flag=-1
                     else:
+                        self.index+=1
+                        self.Generate_files(data)
                         tempCount=self.vertex_counter
                         flag=1
                 if flag==-1:
                     break
-            print(i)
+            print("Dotarto do:"+str(i))
             if (error_count2==how_much):
-                print("TIMEOUT")
+                self.index=index_before
+                print("Pomimo "+str(how_much)+" prób nie udało się wykonać serii "+str(how_much)+" transformacji.\nTIMEOUT")
                 return
             error_count2+=1
-        self.index+=1
+        #self.index+=1
+        #self.max_index=self.index
+        #self.Generate_files(data)
         self.max_index=self.index
-        self.Generate_files(data)
         img=tk.PhotoImage(file = self.output_folder+str(self.index)+".png")
         self.Graph_label.image = img
         self.Graph_label.configure(image = img)
         self.Update_stats_label()
-        print("Wszystko--- %s seconds ---" % (time.time() - start_time_main))
     def Generate_files(self,graph):
         graph.write_dot(self.output_folder+str(self.index)+".gv")
         os.system("dot -Kneato -Tpng -o "+self.output_folder+str(self.index)+".png "+ self.output_folder+str(self.index)+".gv")
     def Backward_button_clicked(self):
+        tmp=int(self.Index_text.get("1.0",tk.END))
+        if tmp!=self.index:
+            if tmp-1>=0:
+                if tmp-1<=self.max_index:
+                    self.index=tmp
+                else:
+                    self.index=self.max_index
+            else:
+                self.index=1
         if self.index-1<0:
             return
         self.index-=1
@@ -182,6 +206,15 @@ class MainApplication(tk.Tk):
         self.Graph_label.configure(image = img)
         self.Update_stats_label()
     def Forward_button_clicked(self):
+        tmp=int(self.Index_text.get("1.0",tk.END))
+        if tmp!=self.index:
+            if tmp+1>=0:
+                if tmp+1<self.max_index:
+                    self.index=tmp
+                else:
+                    self.index=self.max_index-1
+            else:
+                self.index=0
         if not self.index<self.max_index:
             return
         self.index+=1
