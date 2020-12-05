@@ -1,4 +1,7 @@
 import pydot
+import os
+
+input_folder = 'input/'
 
 class Pair:
     def __init__(self, production, transformation):
@@ -26,6 +29,7 @@ class Transform:
 def get_productions(filename):
     productParentGraph = pydot.graph_from_dot_file(filename)[0]
     subgraphs = productParentGraph.get_subgraphs()
+    os.remove(filename)
     return subgraphs
 
 def get_transforms(filename):
@@ -57,7 +61,8 @@ def get_transforms(filename):
                     newTransform.addBinding((vertexLabel, labelsList))
                 lineTrc += 1
         lineTrc += 1
-
+    transformFile.close()
+    os.remove(filename)
     return transforms
 
 def pair(prodGraphs, transforms):
@@ -70,3 +75,39 @@ def pair(prodGraphs, transforms):
                 ret[name] = Pair(p, t)
         if ret[name] is None: ret[name] = Pair(p, None)
     return ret
+
+def splitInputIntoTempFiles(filename):
+    input_file = open(filename, 'r')
+    grahp_file = open(input_folder + "tempGraph.dot", 'w')
+    prod_file = open(input_folder + "tempProd.dot", 'w')
+    trans_file = open(input_folder + "tempTrans.trsf", 'w')
+    files = [grahp_file, prod_file, trans_file]
+    Lines = []
+    
+    p = 0
+
+    for line in input_file:
+        p += 1
+        newLine = line.strip()
+        if newLine != "":
+            Lines.append(newLine)
+
+    lineCtr = len(Lines)
+    
+    separators = []
+
+    for i in range(lineCtr):
+        if Lines[i][0] == '#':
+            separators.append(i)
+
+    def overwrite(file, start, end):
+        nonlocal Lines
+        for i in range(start+1, end):
+            file.write(Lines[i] + "\n")
+
+    for i in range(3):
+        overwrite(files[i], separators[i], separators[i+1])
+
+    for file in files:
+        file.close()
+       

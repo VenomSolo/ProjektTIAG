@@ -10,6 +10,7 @@ import random
 
 class MainApplication(tk.Tk):
     output_folder="output/"
+    input_folder="input/"
     max_index=0#Uzywane w 'historii' grafu
     index=0#id aktualnie wyswietlanego grafu
     def __init__(self):
@@ -58,15 +59,17 @@ class MainApplication(tk.Tk):
         #Load Data
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
-        data=pydot.graph_from_dot_file(fd.askopenfilename(parent=self,title='Wybierz początkowy plik DOT'))[0]
+        input=parser.splitInputIntoTempFiles(fd.askopenfilename(parent=self,title='Wybierz początkowy plik Input'))
+        data=pydot.graph_from_dot_file(self.input_folder + "tempGraph.dot")[0]
+        os.remove("input/tempGraph.dot")
         self.Generate_files(data)
         self.vertex_counter = len(data.get_nodes())+1
         img=tk.PhotoImage(file = self.output_folder+str(self.index)+".png")
         self.Graph_label.image =img
         self.Graph_label.configure(image = img)
         self.Update_stats_label()
-        transforms = parser.get_transforms(fd.askopenfilename(parent=self,title='Wybierz plik z transformacjami'))
-        productions = parser.get_productions(fd.askopenfilename(parent=self,title='Wybierz plik z produkcjami'))
+        transforms = parser.get_transforms(self.input_folder + "tempTrans.trsf")
+        productions = parser.get_productions(self.input_folder + "tempProd.dot")
         self.pairs = parser.pair(productions, transforms);
 
         #Drop list
@@ -105,7 +108,7 @@ class MainApplication(tk.Tk):
                     "Liczba krawędzi\n"+str(stats_ret[1])+'\n\n'+
                     "Średni stopień wierzchołka w Gk\n"+str(round(stats_ret[1]*2/stats_ret[0],2))+"\n\n"+
                     "Liczba składowych spójnych\n"+str(len(stats_ret[3]))+"\n\n"+
-                    "Średni stopień wierzchołka dla nazw\n"+str3+"\n\n"+
+                    "Średni stopień wierzchołka dla etykiet\n"+str3+"\n\n"+
                     "Liczba węzłów w spójnych składowych\n"+str(stats_ret[3])+
                     "\n\n Średnia liczba węzłów w składowej spójnej\n"+str(stats_ret[0]/len(stats_ret[3])))
         self.Stats_label.configure(text=stats_text)
