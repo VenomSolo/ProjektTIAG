@@ -19,7 +19,7 @@ def get_neighbours(dot, node):
     return ret
 
 def get_node_label(dot, label):
-    return [n for n in dot.get_nodes() if n.get("label") is label]
+    return [n for n in dot.get_nodes() if n.get("label") == label]
 
 def delete_node(dot, node):
     neighbours = get_neighbours(dot, node)
